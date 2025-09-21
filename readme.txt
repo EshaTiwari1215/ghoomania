@@ -1,7 +1,7 @@
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'alishapanday69@gmail.com'
-app.config['MAIL_PASSWORD'] = 'qxvxiifxzujrrymb'
+
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
@@ -195,3 +195,4 @@ base.html
     </script>
 </body>
 </html>
+
