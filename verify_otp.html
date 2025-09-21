@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Verify OTP{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Verify Your Email</h3>
+                <p class="text-center text-muted">An OTP was sent to your email. Please enter it below.</p>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="otp" class="form-label">6-Digit OTP</label>
+                        <input type="text" class="form-control" id="otp" name="otp" required maxlength="6" pattern="\d{6}">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Verify & Complete Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Verify Your Visit{% endblock %}
+{% block content %}
+<div class="container" style="max-width: 500px; margin-top: 5rem;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4 text-center">
+            
+            <i class="fas fa-map-marked-alt fa-3x text-primary mb-3"></i>
+
+            <h3 class="card-title mb-2">Verify Your Visit</h3>
+            <p class="text-muted">You've discovered: <strong>{{ spot.name }}</strong></p>
+            
+            <hr>
+
+            <div id="geo-status" class="my-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Fetching your location to verify proximity...</p>
+                <p class="small text-muted">(Please approve the location request from your browser)</p>
+            </div>
+            
+            <div id="coords-display" class="my-3 small"></div>
+
+            <form method="POST" id="verify-form">
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+
+                <div data-mdb-input-init class="form-outline my-4">
+                    <input type="text" id="code" name="code" class="form-control form-control-lg text-center" style="text-transform: uppercase; letter-spacing: 0.5em;" maxlength="6" required/>
+                    <label class="form-label" for="code">Enter Secret Code</label>
+                </div>
+                <button type="submit" id="submit-button" class="btn btn-primary btn-lg" data-mdb-ripple-init disabled>
+                    Claim Coins
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusDiv = document.getElementById('geo-status');
+        const coordsDiv = document.getElementById('coords-display');
+        const latInput = document.getElementById('latitude');
+        const lonInput = document.getElementById('longitude');
+        const submitButton = document.getElementById('submit-button');
+
+        if (!navigator.geolocation) {
+            statusDiv.innerHTML = '<p class="text-danger">Geolocation is not supported by your browser. You cannot claim rewards.</p>';
+            return;
+        }
+
+        function handleSuccess(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            latInput.value = latitude;
+            lonInput.value = longitude;
+
+            statusDiv.innerHTML = '<p class="text-success fw-bold"><i class="fas fa-check-circle"></i> Location Verified!</p>';
+            coordsDiv.innerHTML = `<span>Detected Location: Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}</span>`;
+            
+            submitButton.disabled = false;
+        }
+
+        function handleError(error) {
+            let errorMessage = 'An unknown error occurred.';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Location access was denied. Please enable location permissions for this site in your browser settings to claim rewards.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "The request to get your location timed out.";
+                    break;
+            }
+            statusDiv.innerHTML = `<p class="text-danger">${errorMessage}</p>`;
+        }
+
+        navigator.geolocation.getCurrentPosition(handleSuccess, handleError, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        });
+    });
+</script>
+{% endblock %}

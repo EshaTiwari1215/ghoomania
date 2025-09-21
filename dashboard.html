@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}Ghoomania{% endblock %}
+{% block content %}
+<header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('dashboard') }}" style="color: #0866FF; font-weight: bold; font-size: 1.8rem;">
+      ghoomania
+    </a>
+    <div class="d-flex align-items-center ms-auto">
+      <a href="#" class="btn btn-primary rounded-pill d-flex align-items-center me-2 scan-qr-button"
+         data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#qrScannerModal" title="Scan QR Code">
+        <i class="fas fa-qrcode fa-lg me-2"></i>
+        Scan & Discover
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="main-body">
+  <aside class="left-sidebar">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item d-flex align-items-center">
+        <img src="{{ user.profile_picture }}" class="rounded-circle me-2" style="width: 36px; height: 36px;">
+        <span class="fw-bold">{{ user.username }}</span>
+      </li>
+      <li class="list-group-item d-flex align-items-center">
+        <a href="{{ url_for('my_bucket_list') }}" class="text-decoration-none text-dark d-flex align-items-center">
+            <i class="fas fa-bookmark fa-lg me-3" style="color: #1877F2;"></i>
+            <span>My Bucket List</span>
+        </a>
+      </li>
+      <li class="list-group-item d-flex align-items-center" style="cursor: pointer;" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#addSpotModal">
+        <i class="fas fa-plus-circle fa-lg me-3" style="color: #42B72A;"></i>
+        <span>Add New Spot</span>
+      </li>
+      <li class="list-group-item d-flex align-items-center">
+        <i class="fas fa-coins fa-lg me-3" style="color: #F7B928;"></i>
+        <span>Coins: {{ user.coins }}</span>
+      </li>
+      <hr class="my-2">
+      <li class="list-group-item d-flex align-items-center">
+        <a href="{{ url_for('logout') }}" class="text-decoration-none text-danger d-flex align-items-center">
+          <i class="fas fa-sign-out-alt fa-lg me-3"></i>
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="center-feed">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <img src="{{ user.profile_picture }}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
+          <a href="#" class="btn btn-light text-start flex-grow-1 rounded-pill text-muted" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#addSpotModal">
+            What hidden gem did you find, {{ user.username }}?
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {% for spot in spots %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="{{ spot.uploader_pfp }}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+            <span class="fw-bold">{{ spot.uploader_name }}</span>
+        </div>
+        <a href="#" class="btn btn-outline-dark btn-floating btn-sm"
+           data-mdb-ripple-init
+           data-mdb-modal-init
+           data-mdb-target="#viewQrModal"
+           data-qr-url="{{ url_for('generate_qr_code', spot_id=spot.id) }}"
+           data-spot-name="{{ spot.name }}"
+           title="Show QR Code">
+            <i class="fas fa-qrcode"></i>
+        </a>
+      </div>
+      
+      {% if spot.image %}
+        {% if spot.image.startswith('uploads/') %}
+          <img src="{{ url_for('uploaded_file', filename=spot.image.split('/')[-1]) }}" class="img-fluid" alt="{{ spot.name }}">
+        {% else %}
+          <img src="{{ spot.image }}" class="img-fluid" alt="{{ spot.name }}">
+        {% endif %}
+      {% endif %}
+
+      <div class="card-body pb-0">
+        <h5 class="card-title">{{ spot.name }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ spot.city }}</h6>
+        <div id="story-{{ spot.id }}" class="story-text story-collapsed">
+            {{ spot.story }}
+        </div>
+        {% if spot.story|length > 200 %}
+          <a href="#" class="read-more-btn" data-target="#story-{{ spot.id }}">Read More</a>
+        {% endif %}
+        <div class="d-flex justify-content-between align-items-center text-muted py-2">
+            <div><span id="rec-count-{{ spot.id }}">{{ spot.rec_count }}</span> Recommendations</div>
+            <div class="fw-bold text-warning" id="potential-coins-{{ spot.id }}">
+                <i class="fas fa-coins me-1"></i> {{ spot.potential_coins }} Coins on Visit
+            </div>
+        </div>
+        <div class="text-center py-2 bg-light rounded">
+            <span class="text-muted small">Verification Code:</span>
+            <span class="fw-bold font-monospace h5">{{ spot.verification_code }}</span>
+        </div>
+      </div>
+      <hr class="my-0">
+      <div class="card-footer bg-white border-0 py-1">
+        <div class="d-flex justify-content-around">
+            <a href="#" class="btn btn-link text-muted text-decoration-none action-btn recommend-btn {% if spot.user_recommended %}recommended{% endif %}" data-spot-id="{{ spot.id }}">
+                <i class="fas fa-heart me-2"></i><span>Recommend</span>
+            </a>
+            <a href="#" class="btn btn-link text-muted text-decoration-none action-btn bucket-btn {% if spot.user_bucketed %}bucketed{% endif %}" data-spot-id="{{ spot.id }}">
+                <i class="fas fa-bookmark me-2"></i><span>{% if spot.user_bucketed %}In Bucket{% else %}Add to Bucket{% endif %}</span>
+            </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </main>
+
+  <aside class="right-sidebar">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-title text-muted">TRENDING SPOTS</h6>
+        <ul class="list-group list-group-flush">
+          {% for spot in top_spots %}
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div class="d-flex align-items-center">
+              {% if spot.image %}
+                {% if spot.image.startswith('uploads/') %}
+                  <img src="{{ url_for('uploaded_file', filename=spot.image.split('/')[-1]) }}" class="rounded-3 me-2" alt="{{ spot.name }}" style="width: 45px; height: 45px; object-fit: cover;">
+                {% else %}
+                  <img src="{{ spot.image }}" class="rounded-3 me-2" alt="{{ spot.name }}" style="width: 45px; height: 45px; object-fit: cover;">
+                {% endif %}
+              {% endif %}
+              <span>{{ spot.name }}</span>
+            </div>
+            <span class="badge bg-primary rounded-pill">{{ spot.rec_count }} <i class="fas fa-heart fa-xs"></i></span>
+          </li>
+          {% else %}
+          <li class="list-group-item">No recommendations yet!</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="modal fade" id="addSpotModal" tabindex="-1" aria-labelledby="addSpotModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-5 rounded-3 border-0">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title w-100 text-center fw-bold" id="addSpotModalLabel">Share a Hidden Gem</h5>
+        <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('add_spot') }}" enctype="multipart/form-data">
+        <div class="modal-body pt-0 px-4">
+          <div data-mdb-input-init class="form-outline mb-4">
+            <input type="text" id="name" name="name" class="form-control" required/>
+            <label class="form-label" for="name">Spot Name</label>
+          </div>
+          <div data-mdb-input-init class="form-outline mb-4">
+            <input type="text" id="city" name="city" class="form-control" required/>
+            <label class="form-label" for="city">City</label>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <p class="text-muted small mb-0">Enter the spot's coordinates:</p>
+            <button type="button" class="btn btn-info btn-floating btn-sm" data-mdb-ripple-init data-mdb-modal-init data-mdb-target="#instructionsModal">
+                <i class="fas fa-question"></i>
+            </button>
+          </div>
+          <div class="row my-3">
+            <div class="col">
+              <div data-mdb-input-init class="form-outline">
+                <input type="text" id="latitude" name="latitude" class="form-control" required/>
+                <label class="form-label" for="latitude">Latitude</label>
+              </div>
+            </div>
+            <div class="col">
+              <div data-mdb-input-init class="form-outline">
+                <input type="text" id="longitude" name="longitude" class="form-control" required/>
+                <label class="form-label" for="longitude">Longitude</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label for="image" class="form-label text-muted">Upload Image</label>
+            <input class="form-control" type="file" id="image" name="image" accept="image/png, image/jpeg, image/gif" />
+          </div>
+          <div data-mdb-input-init class="form-outline mb-4">
+            <textarea class="form-control" id="story" name="story" rows="4" required></textarea>
+            <label class="form-label" for="story">What's the story here?</label>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 px-4">
+          <button type="submit" class="btn btn-primary btn-block rounded-pill" data-mdb-ripple-init>Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrScannerModalLabel">Scan QR Code</h5>
+        <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="qr-reader" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="instructionsModalLabel"><i class="fas fa-map-signs me-2"></i>How to Get Coordinates</h5>
+                <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ol class="list-group list-group-light list-group-numbered">
+                    <li class="list-group-item">Go to the link: <a href="https://www.google.com/maps" target="_blank">Google Maps</a></li>
+                    <li class="list-group-item">Use the search bar to find your desired destination.</li>
+                    <li class="list-group-item">Once you find it, right-click on the exact spot on the map.</li>
+                    <li class="list-group-item">A menu will appear. Click on the first option, which will be the latitude and longitude numbers.</li>
+                    <li class="list-group-item">This automatically copies the coordinates. Remember to paste the latitude and longitude into their separate boxes.</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="back-to-add-spot-btn" class="btn btn-secondary" data-mdb-ripple-init>Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewQrModal" tabindex="-1" aria-labelledby="viewQrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewQrModalLabel">Scan this Code</h5>
+        <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="qr-code-image" src="" alt="QR Code" class="img-fluid">
+        <p class="mt-2 small text-muted">Print and place this at the physical location.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .scan-qr-button {
+    background-color: #ff416c;
+    background-image: linear-gradient(to right, #ff416c 0%, #ff4b2b 100%);
+    border: none;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    padding: 8px 20px;
+  }
+
+  .scan-qr-button:hover {
+    background-color: #ff4b2b;
+    background-image: linear-gradient(to right, #ff4b2b 0%, #ff416c 100%);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+  }
+
+  .scan-qr-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}

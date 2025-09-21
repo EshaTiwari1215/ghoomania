@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}My Bucket List{% endblock %}
+{% block content %}
+<header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('dashboard') }}" style="color: #0866FF; font-weight: bold; font-size: 1.8rem;">
+      ghoomania
+    </a>
+    <div class="d-flex align-items-center ms-auto">
+      <a href="{{ url_for('logout') }}" class="btn btn-light rounded-circle" style="width: 40px; height: 40px;">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container" style="max-width: 900px;">
+    <h2 class="my-4">My Bucket List</h2>
+    <a href="{{ url_for('dashboard') }}">&larr; Back to Dashboard</a>
+    <hr>
+    
+    {% if spots %}
+    <div class="row">
+        {% for spot in spots %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                {% if spot.image %}
+                    {% if spot.image.startswith('uploads/') %}
+                    <img src="{{ url_for('uploaded_file', filename=spot.image.split('/')[-1]) }}" class="card-img-top" alt="{{ spot.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <img src="{{ spot.image }}" class="card-img-top" alt="{{ spot.name }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ spot.name }}</h5>
+                    <p class="card-text text-muted">{{ spot.city }}</p>
+                    <a href="#" class="btn btn-primary mt-auto" data-mdb-ripple-init>Plan my tour</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h4>Your bucket list is empty!</h4>
+        <p>Go back to the dashboard and add some spots you'd like to visit.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
