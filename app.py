@@ -11,13 +11,13 @@ from werkzeug.utils import secure_filename
 import qrcode
 
 app = Flask(__name__)
-app.secret_key = "averysecretkey"
+
 DATABASE = "app.db"
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'alishapanday69@gmail.com'
-app.config['MAIL_PASSWORD'] = 'qxvxiifxzujrrymb'
+
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
@@ -401,4 +401,5 @@ if __name__ == "__main__":
         os.makedirs(UPLOAD_FOLDER)
     with app.app_context():
         init_db()
+
     app.run(debug=True)
